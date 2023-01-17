@@ -34,12 +34,23 @@
             if ($password === $cofirm_password) {
                 //Verificar se já existe e-mail cadastrado.
                 if ($userDao->findByEmail($email) === false) {
-                     echo "E-mail não encontrado!";
+                    
+                    $user = new User();   
+                
+                    $user->setName($name);
+                    $user->setLastname($lastname);
+                    $user->setEmail($email);
+                    $user->setHashPassword($password);
+                    $user->setToken();
+
+                    $auth = true;
+
+                    $userDao->create($user, $auth);
+
                 } else { 
                     //Enviar mensagem de email já cadastrado.
                     $message->setMessage("E-mail já cadastrado.", "error", "back");
                 }
-                
             } else {
                 //Enviar mensagem de senha, de confirmação, direfente.
                 $message->setMessage("As senhas não são iguais.", "error", "back");

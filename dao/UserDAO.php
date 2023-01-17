@@ -1,16 +1,19 @@
 <?php 
 
     require_once("models/User.php");
+    require_once("models/Message.php");
 
     class UserDAO implements UserDAOInterface{
 
         private $conn;
         private $url;
+        private $message;
 
         public function __construct(PDO $conn, $url)
         {
             $this->conn=$conn;
             $this->url=$url;
+            $this->message= new Message($url);
         }
 
         public function buildUser($data){
@@ -21,7 +24,7 @@
             $user->setName($data["name"]);
             $user->setLastname($data["lastname"]);
             $user->setEmail($data["email"]);
-            $user->setPassword($data["password"]);
+            $user->setHashPassword($data["password"]);
             $user->setImage($data["image"]);
             $user->setBio($data["bio"]);
             $user->setToken($data["token"]);
@@ -32,6 +35,35 @@
 
         public function create(User $user, $authUser=false){
 
+            $name = $user->getName();
+            $lastname = $user->getLastname();
+            $email = $user->getEmail();
+            $password = $user->getHashPassword();
+            $token = $user->getToken();
+
+            $stmt = $this->conn->prepare("
+                INSERT INTO users( 
+                    name, lastname, email, password, token
+                ) VALUES (
+                    :name, :lastname, :email, :password, :token
+                )
+            ");
+
+            $stmt->bindParam(":name", $name);
+            $stmt->bindParam(":lastname", $lastname);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":password", $password);
+            $stmt->bindParam(":token", $token);
+
+            $stmt->execute();
+
+            //Autenticar usuário caso auth seja true.
+            if ($authUser) {
+                $this->setTokenToSession($token);
+            } else {
+
+            }
+            
         }
 
         public function update(User $user){
@@ -44,6 +76,12 @@
 
         public function setTokenToSession($token, $redirect=true){
 
+            //Salvar token na session.
+            $_SESSION["token"] = $token;
+            if ($redirect) {
+                //Redireciona para o perfil do usuário.
+                $this->message->setMessage("Seja Bem-vindo!", "success", "editprofile.php");
+            }
         }
 
         public function authenticateUser($email, $password){

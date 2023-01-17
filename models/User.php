@@ -6,12 +6,10 @@
         private $name;
         private $lastname;
         private $email;
-        private $password;
+        private $hashPassword;
         private $image;
         private $bio;
         private $token;
-        
-
 
         /**
          * Get the value of id
@@ -96,9 +94,9 @@
         /**
          * Get the value of password
          */ 
-        public function getPassword()
+        public function getHashPassword()
         {
-                return $this->password;
+                return $this->hashPassword;
         }
 
         /**
@@ -106,9 +104,9 @@
          *
          * @return  self
          */ 
-        public function setPassword($password)
+        public function setHashPassword($password)
         {
-                $this->password = $password;
+                $this->hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
                 return $this;
         }
@@ -166,12 +164,13 @@
          *
          * @return  self
          */ 
-        public function setToken($token)
+        public function setToken()
         {
-                $this->token = $token;
+                $this->token = bin2hex(random_bytes(50));
 
                 return $this;
         }
+
     }
 
     interface UserDAOInterface {
