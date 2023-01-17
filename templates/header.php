@@ -3,9 +3,16 @@
     error_reporting(E_ALL);
     
     require_once("globals.php");
-    require_once("db.php");
+    require_once("db.php"); 
+    require_once("models/Message.php");
 
-    $flassMessage=[];
+    $message = new Message($BASE_URL);
+
+    $flassMessage= $message->getMessage();
+
+    if (!empty($flassMessage["msg"])) {
+        //limpar
+    }
 ?>
 
 <!DOCTYPE html>
