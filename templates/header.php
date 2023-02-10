@@ -9,13 +9,13 @@
 
     $message = new Message($BASE_URL);
 
-    $userDao = new UserDAO($conn, $BASE_URL);
-
     $flassMessage= $message->getMessage();
 
     if (!empty($flassMessage["msg"])) {
-        //limpar
+        $message->clearMessage();   
     }
+
+    $userDao = new UserDAO($conn, $BASE_URL);
 
     $userData = $userDao->verifyToken(false);
 ?>
@@ -61,7 +61,7 @@
                         <a href="<?=$BASE_URL?>dashboard.php" class="nav-link">Meus Filmes</a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?=$BASE_URL?>editprofile.php" class="nav-link bold"><?= $userData->getName() ?></a>
+                        <a href="<?=$BASE_URL?>editprofile.php" class="nav-link bold"><?= $userData->name ?></a>
                     </li>
                     <li class="nav-item">
                         <a href="<?=$BASE_URL?>logout.php" class="nav-link">Sair</a>

@@ -1,4 +1,6 @@
-<?php 
+<?php
+
+use function PHPSTORM_META\type;
 
     ini_set('display_errors', true); 
     error_reporting(E_ALL);
@@ -9,39 +11,42 @@
     require_once("models/Message.php");
     require_once("dao/UserDAO.php");
 
-    //Criando um objeto para query no banco.
-    $userDao = new UserDAO($conn, $BASE_URL);
-
-    //Criando um objeto para tratar o envio de mensagens.
     $message = new Message($BASE_URL);
 
-    //Recebendo dados formulário enviado.
-    $name=filter_input(INPUT_POST, "name");
-    $lastname=filter_input(INPUT_POST, "lastname");
-    $email=filter_input(INPUT_POST, "email");
-    $password=filter_input(INPUT_POST, "password");
-    $cofirm_password=filter_input(INPUT_POST, "confirm_password");
+    $userDao = new UserDAO($conn, $BASE_URL);
 
-    //Recebe o tipo de formulário enviado (login ou register).
     $type=filter_input(INPUT_POST, "type");
 
     //Direciona o formulário de acordo com seu tipo.
     if ($type==="register") {
-        
+
+        //Recebendo dados formulário enviado.
+        $name=filter_input(INPUT_POST, "name");
+        $lastname=filter_input(INPUT_POST, "lastname");
+        $email=filter_input(INPUT_POST, "email");
+        $password=filter_input(INPUT_POST, "password");
+        $cofirm_password=filter_input(INPUT_POST, "confirm_password");
+               
         //Verificando se os dados mínimos foram enviados.
         if ($name && $lastname && $email && $password) {
+
             //Verificar a senha de confirmação.
             if ($password === $cofirm_password) {
+                
                 //Verificar se já existe e-mail cadastrado.
                 if ($userDao->findByEmail($email) === false) {
                     
-                    $user = new User();   
+                    $user = new User();  
+                    
+                    //Criação de token e senha.
+                    $userToken = $user->generateToken();
+                    $finalPassword = $user->generatePassword($password);
                 
-                    $user->setName($name);
-                    $user->setLastname($lastname);
-                    $user->setEmail($email);
-                    $user->setHashPassword($password);
-                    $user->setToken();
+                    $user->name=$name;
+                    $user->lastname=$lastname;
+                    $user->email=$email;
+                    $user->password=$finalPassword;
+                    $user->token=$userToken;
 
                     $auth = true;
 
@@ -62,7 +67,20 @@
         }
 
     } else if ($type==="login") {
-        # code...
+
+        $email=filter_input(INPUT_POST, "email");
+        $password=filter_input(INPUT_POST, "password");
+    
+        if ($userDao->authenticateUser($email, $password)) {
+
+            $message->setMessage("Seja bem vindo!", "success", "editprofile.php");
+
+        } else { 
+            $message->setMessage("Usuário e/ou senha inválidos.", "error", "back");
+        } 
+            
+    } else {
+        $message->setMessage("Informações inválidas.", "error", "index.php");
     }
     
 ?>
