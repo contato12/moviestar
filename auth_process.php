@@ -1,7 +1,5 @@
 <?php
 
-use function PHPSTORM_META\type;
-
     ini_set('display_errors', true); 
     error_reporting(E_ALL);
 
